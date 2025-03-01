@@ -1,0 +1,90 @@
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+import time
+
+class BasePage(object):
+    timeoutSec = 5
+
+    def __init__(self, browser):
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(driver, self.timeoutSec)
+
+    def setTimeoutSec(self, timeoutSec):
+        self.timeoutSec = timeoutSec
+
+    def visit(self, url):
+        driver.get(url)
+
+    def quit(self):
+        if driver:
+            driver.quit()
+
+class KickerPlayerProfilePage(BasePage):
+    # Locate the main container div
+    person_detail = (By.CLASS_NAME, "kick__vita__header__person-detail")
+
+    # Extract First and Last Name
+    first_name = (By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1 span").text
+    last_name = (By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1").text.replace(first_name, "").strip()
+
+    def __init__(self, browser):
+        super().__init__(browser)
+        #self.driver = driver
+        #self.visit("url")
+        # Locate the main container div
+        person_detail = self.driver.find_element(person_detail)
+
+        # Extract First and Last Name
+        first_name = person_detail.find_element(By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1 span").text
+        last_name = person_detail.find_element(By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1").text.replace(first_name, "").strip()
+
+# Initialize WebDriver
+driver = webdriver.Chrome()
+driver.get("https://www.kicker.de/nick-woltemade/spieler/bundesliga/2024-25/vfb-stuttgart")  # Replace with actual URL
+
+# Locate the main container div
+person_detail = driver.find_element(By.CLASS_NAME, "kick__vita__header__person-detail")
+
+# Extract First and Last Name
+first_name = person_detail.find_element(By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1 span").text
+last_name = person_detail.find_element(By.CSS_SELECTOR, ".kick__vita__header__person-name-medium-h1").text.replace(first_name, "").strip()
+
+# Extract Key-Value Details
+data = {}
+kv_pairs = person_detail.find_elements(By.CLASS_NAME, "kick__vita__header__person-detail-kvpair-info")
+
+for kv in kv_pairs:
+    spans = kv.find_elements(By.TAG_NAME, "span")
+    if spans:
+        key = spans[0].text.strip().replace(":", "")
+        value = kv.text.replace(spans[0].text, "").strip()
+        print(key + " " + value)
+
+        # Convert height and weight to integers
+        if key == "Größe":
+            value = int(value.replace(" cm", ""))
+        elif key == "Gewicht":
+            value = int(value.replace(" kg", ""))
+        elif key.startswith("Nation"):
+            value = [nation.text.strip() for nation in kv.find_elements(By.CLASS_NAME, "kick__vita__header__person-detail-kvpair--nation")]
+            key = "Nation"
+        
+        data[key] = value
+
+# Final dictionary
+player_data = {
+    "firstName": first_name,
+    "lastName": last_name,
+    "Position": data.get("Position", ""),
+    "Größe": data.get("Größe", 0),
+    "Gewicht": data.get("Gewicht", 0),
+    "Geboren": data.get("Geboren", ""),
+    "Nation": data.get("Nation", [])
+}
+
+# Print the extracted dictionary
+print(player_data)
+
+# Close WebDriver
+driver.quit()
