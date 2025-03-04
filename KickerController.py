@@ -13,10 +13,12 @@ class KickerController():
     def get_all_player_profiles_for_season(self):
         profiles = []
         
+        print("Calling https://www.kicker.de/bundesliga/teams/2024-25")
+
         self.teams.visit("https://www.kicker.de/bundesliga/teams/2024-25")
         teams = self.teams.get_teams_for_season("season")
 
-        for url in teams[:1]:
+        for url in teams:
             self.players.visit(url.replace("info", "kader"))
             players = self.players.get_team_players_list() 
             for player in players:

@@ -5,14 +5,17 @@ from datetime import datetime
 @dataclass
 class Player:
     id: str
-    first_name: str
-    last_name: str
-    date_of_birth: str  # Keep as string for JSON serialization
+    firstName: str
+    lastName: str
+    currentClub: str
+    dateOfBirth: str  # Keep as string for JSON serialization
     height: int = 0
     weight: int = 0
     position: str = ''
     nations: List[str] = None
     age: int = 0
+    geburtsname: str = ''
+    namensverlauf: str = ''
 
     def calc_age(self) -> int:
         """Calculate the player's age based on the dateOfBirth."""

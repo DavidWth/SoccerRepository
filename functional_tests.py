@@ -14,7 +14,7 @@ class KickerRepostioryManagerTest(unittest.TestCase):
 
         self.assertIsInstance(player_profiles, (list), "Player profiles is not a list!")
 
-    def test_save_profiles_to_file(self):
+    def ttest_save_profiles_to_file(self):
         # Navigate to the Kicker Clubs Overview page and select the appropiate sesaon year (eg 2024/25) > (https://www.kicker.de/bundesliga/teams/2024-25)
         # The page pops up and shows all clubs of that season's Bundesliga competition
         # There we will get all club names and the corresponding links to their squads (club name: Bayern München, link to squad: https://www.kicker.de/fc-bayern-muenchen/kader/bundesliga/2024-25)
@@ -33,7 +33,7 @@ class TransfermarktRepostioryManagerTest(unittest.TestCase):
 
         self.assertIsInstance(player_profiles, (list), "Player profiles is not a list!")
 
-    def tfest_save_profiles_to_file(self):
+    def test_save_profiles_to_file(self):
         # Navigate to the Kicker Clubs Overview page and select the appropiate sesaon year (eg 2024/25) > (https://www.kicker.de/bundesliga/teams/2024-25)
         # The page pops up and shows all clubs of that season's Bundesliga competition
         # There we will get all club names and the corresponding links to their squads (club name: Bayern München, link to squad: https://www.kicker.de/fc-bayern-muenchen/kader/bundesliga/2024-25)

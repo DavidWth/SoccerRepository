@@ -113,7 +113,7 @@ class PlayerMarketValue(BasePageElement):
         self.data = {}
 
         try:
-            iframe = WebDriverWait(element, 4).until(
+            iframe = WebDriverWait(element, 2).until(
                 EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//iframe[@title='Iframe title']"))
             )
         except:

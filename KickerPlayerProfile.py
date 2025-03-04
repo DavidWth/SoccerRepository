@@ -53,10 +53,10 @@ class PlayerProfile(BasePageElement):
         self.__load_data_dc(element)
 
     def get_last_name(self):
-        return self.last_name
+        return self.lastName
         
     def get_first_name(self):
-        return self.first_name
+        return self.firstName
     
     def get_height(self):
         return self.height
@@ -74,8 +74,9 @@ class PlayerProfile(BasePageElement):
         return re.sub(r"\(.*?\)", "", value).strip()
 
     def __load_data(self, element):
-        self.first_name = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.firstNameDiv).text)
-        self.last_name = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.lastNameDiv).text.replace(self.first_name, ""))
+        self.firstName = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.firstNameDiv).text)
+        self.lastName = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.lastNameDiv).text.replace(self.firstName, ""))
+        self.current_club = self.element.find_element(*KickerPageLocators.currentClub).text
  
         # Extract Key-Value Details
         data = {}
@@ -104,9 +105,10 @@ class PlayerProfile(BasePageElement):
     def __load_data_dc(self, element):
         data = {}
         
-        data["last_name"] = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.lastNameDiv).text.replace(self.get_first_name(), ""))
-        data["first_name"] = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.firstNameDiv).text)
         data["id"] = element.get_attribute('baseURI').split('/')[3]
+        data["lastName"] = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.lastNameDiv).text.replace(self.get_first_name(), ""))
+        data["firstName"] = self.__remove_parentheses(self.element.find_element(*KickerPageLocators.firstNameDiv).text)
+        data["currentClub"] = self.element.find_element(*KickerPageLocators.currentClub).text
 
         # Extract Key-Value Details
         kv_pairs = element.find_elements(*KickerPageLocators.playerInfoDiv)
@@ -123,7 +125,7 @@ class PlayerProfile(BasePageElement):
                 elif key == "Gewicht":
                     data["weight"] = int(value.replace(" kg", ""))
                 elif key == "Geboren":
-                    data["date_of_birth"] = datetime.strptime(value.split()[0], "%d.%m.%Y").date().strftime("%Y-%m-%d")
+                    data["dateOfBirth"] = datetime.strptime(value.split()[0], "%d.%m.%Y").date().strftime("%Y-%m-%d")
                     data["age"] = datetime.today().year - datetime.strptime(value.split()[0], "%d.%m.%Y").date().year
                 elif key.startswith("Nation"):
                     data["nations"] = [nation.text.strip() for nation in kv.find_elements(*KickerPageLocators.nationsDv)]
@@ -138,7 +140,7 @@ class PlayerProfile(BasePageElement):
         return self.player
     
     def __str__(self):
-        return f'fn:{self.first_name} ln:{self.self.last_name} h:{self.height} cm w:{self.weight} kg bd: {self.birthdate} n:{self.nations}'
+        return f'fn:{self.firstName} ln:{self.self.lastName} h:{self.height} cm w:{self.weight} kg bd: {self.birthdate} n:{self.nations}'
     
 class KickerPageLocators(object):
     """A class for main page locators. All main page locators should come here"""
@@ -149,3 +151,4 @@ class KickerPageLocators(object):
     nationsDv = (By.CLASS_NAME, "kick__vita__header__person-detail-kvpair--nation")
     playerInfoDiv = (By.CLASS_NAME, "kick__vita__header__person-detail-kvpair-info")
     teamPlayerList = (By.CLASS_NAME, "//main[@class='kick__data-grid__main ")
+    currentClub = (By.XPATH, "//div[@class='kick__vita__header__team-info']/descendant::a")
