@@ -6,4 +6,7 @@ Lib
 __pycache__ 
 pyvenv.cfg 
 *.json 
-*.csv 
+*.csv
+!resources/output_k.json
+!resources/output_tf.json
+!resources/players_fifa.json
