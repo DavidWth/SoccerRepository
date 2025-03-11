@@ -18,7 +18,7 @@ class NormalizationTests(unittest.TestCase):
             ("Jérôme", "Roussillon", "jerome_roussillon"),  # Mixed case handling
             ("László", "Bénes", "laszlo_benes"),  # Mixed case handling
             ("Leo", "Åndalsness", "leo_andalsness"),  # Mixed case handling
-           # ("Adam", "Dźwigała", "adam_dzwigala"),  # Mixed case handling
+            ("Adam", "Dźwigała", "adam_dzwigala"),  # Mixed case handling
         ]
 
 

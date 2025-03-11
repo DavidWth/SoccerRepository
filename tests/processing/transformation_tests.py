@@ -41,3 +41,13 @@ class TransformationTests(unittest.TestCase):
         
         self.assertIsInstance(self.df, pd.DataFrame)
         self.assertEqual(len(self.df.columns), len(df_updated.columns))
+
+    # Analyse the amount of values beloning to a specific attribute
+    # 
+    def remove_players_from_wrong_competition(data:pd.DataFrame, key:str):
+        # Count occurrences of each club
+        club_counts = data[key].value_counts()
+        clubs_filtered=club_counts[club_counts<5].index.tolist()
+        data_filtered = data[~data[key].isin(clubs_filtered)]
+        print(f"From {len(data)} are {len(data_filtered)} left > {len(data)-len(data_filtered)} removed.")
+        return data_filtered
