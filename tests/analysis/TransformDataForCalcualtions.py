@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('../../src/analysis'))
 
 from src.analysis.LoadJSONFile import load_JSON_file
 
-class LoadJSONFileTest(unittest.TestCase):
+class TransformDataForCalcualtions(unittest.TestCase):
     def setUp(self):
         pass
 
