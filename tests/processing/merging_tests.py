@@ -23,7 +23,25 @@ class MergingTests(unittest.TestCase):
             "normalized_name": ["florian_wirtz", "harry_kane", "thomas_muller", "jeremie_frimpong"]
         })
 
-        self.names = [("","",True)]
+        self.similar_names = [
+            ("eric_junior_dina_ebimbe","junior_dina_ebimbe",True),
+            ("","Simons",False),
+            ("Östigaard","Østigård",False),     
+            ("Leonardo", "Leo", True),
+            ("leonardo_scienza", "leo_scienza", False),
+        ]
+
+        self.players = {"lastName_x":{"0":"Wirtz","1":"Kane","2":"Frimpong","3":"Muller"},
+                        "age_x":{"0":22,"1":31,"2":27,"3":33},
+                        "team_x":{"0":"Leverkusen","1":"Bayern Munich","2":"Leverkusen","3":"Bayern Munich"},
+                        "normalized_name":{"0":"florian_wirtz","1":"harry_kane","2":"jeremie_frimpong","3":"thomas_muller"},
+                        "lastName_y":{"0":"Wirtz","1":"Kane","2":"Frimpong","3":"Muller"},
+                        "age_y":{"0":22,"1":31,"2":27,"3":33},
+                        "team_y":{"0":"Leverkusen","1":"Bayern Munich","2":"Leverkusen","3":"Bayern Munich"},
+                        "_merge":{"0":"both","1":"both","2":"both","3":"both"}}
+        
+        self.players_for_similar_entries = pd.read_json("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\testdata_players_names_and_dob.json")
+        
 
     def tearDown(self):
         pass
@@ -56,6 +74,22 @@ class MergingTests(unittest.TestCase):
         self.assertTrue(is_similar)
 
     def test_is_similar_names_with_different_names(self):
-        is_similar = data_merging.is_similar("d","")
+        for name1, name2, expected in self.similar_names:
+            with self.subTest(first_name=name1, last_name=name2):
+                is_similar = data_merging.is_similar(name1, name2)
+                print(f"{name1} :: {name2} :: {is_similar}")
+                self.assertEqual(is_similar, expected)
 
-        self.assertTrue(is_similar)
+    def test_merge_on_additional_attributes(self):
+        print(f"merged> {pd.DataFrame(self.players)}")
+        merged_df = data_merging.find_similar_entries(self.players_for_similar_entries)
+
+        print(f"merged> {merged_df}")
+
+    def test_merge_on_additional_attributes_with_groups_gt_2(self):
+        print(f"merged> {pd.DataFrame(self.players)}")
+        merged_df = data_merging.find_similar_entries(self.players_for_similar_entries)
+
+        print(f"merged> {merged_df}")
+
+    
