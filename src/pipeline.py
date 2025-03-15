@@ -24,7 +24,7 @@ sys.path.append(os.path.abspath('../../src'))
 from src.data_sources.file_loader import load_json_file_into_dataframe
 from src.processing.normalization import normalize_name
 from src.processing.transformation import remove_players_from_wrong_competition
-from src.processing.data_merging import merge_dataframes
+from src.processing.data_merging import merge_dataframes, find_similar_entries
 
 # prepare extract of the three sources
 KICKER_FILE='D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_k.json'
@@ -63,5 +63,37 @@ kicker["source"] = "kicker"
 tf["source"] = "tf"
 fifa["source"] = "fifa"
 
-merged_df=merge_dataframes(kicker, tf, ["normalized_name","dateOfBirth"])
-print(merged_df["merged_df"][["normalized_name","id_x", "firstName_x", "lastName_x","id_y", "firstName_y", "lastName_y"]])
+tf["id"] = tf["id"].apply(lambda x: str(x) if pd.notna(x) else "")
+
+merged_df_info=merge_dataframes(kicker, tf, ["normalized_name","dateOfBirth"])
+merged_df=merged_df_info["merged_df"]
+
+# build up normalized data frame form unmatched entries 
+df_left=merged_df[merged_df["_merge"]=="left_only"][["id_x", "dateOfBirth", "normalized_name", "firstName_x","lastName_x"]]
+df_right=merged_df[merged_df["_merge"]=="right_only"][["id_y", "dateOfBirth","normalized_name", "firstName_y","lastName_y"]]
+# Rename columns in df1 and df2 to match the final format
+df_left = df_left.rename(columns={"id_x": "id", "firstName_x": "firstName", "lastName_x": "lastName"})
+df_right = df_right.rename(columns={"id_y": "id", "firstName_y": "firstName", "lastName_y": "lastName"})
+# Concatenate the two DataFrames
+final_df = pd.concat([df_left, df_right], ignore_index=True)
+final_df = final_df[["id", "firstName", "lastName", "normalized_name", "dateOfBirth"]]
+
+# Group by 'dateOfBirth' and filter groups with more than two entries
+grouped_df = final_df.groupby("dateOfBirth").filter(lambda x: len(x) > 1)
+grouped_df=grouped_df[["id", "normalized_name","dateOfBirth", "firstName", "lastName"]].sort_values(by=['dateOfBirth'], ascending=False)
+print(grouped_df)
+print()
+
+ids=find_similar_entries(grouped_df)
+print(ids)
+print(merged_df)
+
+print(merged_df["normalized_name"].to_list())
+
+for id in ids:
+    print(type(id[0]))
+    row_x = merged_df.loc[(merged_df["normalized_name"]) == id[0]]
+    print(f"{row_x}")
+    row_y = merged_df.loc[merged_df["normalized_name"] == id[1]]
+    print(f"{row_y}")
+    

@@ -74,16 +74,17 @@ def find_similar_entries(df:pd.DataFrame):
         # Compare names within the group
         for (idx1, row1), (idx2, row2) in itertools.combinations(group.iterrows(), 2):
             if is_similar(row1["lastName"], row2["lastName"]):
-                print(f"  Similar last names: {row1['lastName']} ~ {row2['lastName']} {row1['id']}::{int(row2['id'])}")
-                ids.append(({row1['id']}, {row2['id']}))
+                print(f"Row1> {row1.index.values[0]}")
+                print(f"  Similar last names: {row1['lastName']} ~ {row2['lastName']} {row1['id']}::{(row2['id'])}")
+                ids.append((row1['normalized_name'], row2['normalized_name']))
                 break
             if is_similar(row1["firstName"], row2["firstName"]):
-                print(f"  Similar first names: {row1['firstName']} ~ {row2['firstName']} {row1['id']}::{row1['id']}")
-                ids.append(({row1['id']}, {row2['id']}))
+                print(f"  Similar first names: {row1['firstName']} ~ {row2['firstName']} {row1['id']}::{row2['id']}")
+                ids.append((row1['id'], row2['id']))
                 break
             if is_similar(row1["normalized_name"], row2["normalized_name"]):
-                print(f"  Similar normalized names: {row1['normalized_name']} ~ {row2['normalized_name']} {row1['id']}::{row1['id']}")
-                ids.append(({row1['id']}, {row2['id']}))
+                print(f"  Similar normalized names: {row1['normalized_name']} ~ {row2['normalized_name']} {row1['id']}::{row2['id']}")
+                ids.append((row1['id'], row2['id']))
                 break
 
     return ids
