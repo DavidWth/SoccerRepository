@@ -61,33 +61,36 @@ def merge_on_additional_attributes(merged_df:pd.DataFrame):
 # Takes a dataframe and checks rows with same dob on similarities on some name columns 
 # Expected column(s): for grouping> dateOfBirth; for similarity> lastName, firstName, normalized_name
 # return a list of tuples having (id1, id2)
-def find_similar_entries(df:pd.DataFrame):    
+def merge_similar_entries(df:pd.DataFrame):    
     # Group by 'dateOfBirth' and filter groups with more than two entries
     grouped_df = df.groupby("dateOfBirth").filter(lambda x: len(x) > 1)
-    #grouped_df[["normalized_name","dateOfBirth", "firstName", "lastName"]].sort_values(by=['dateOfBirth'], ascending=False)
-
-    ids = []
+    
     # Iterate over each group
+    merged_df_new=pd.DataFrame()
     for date, group in grouped_df.groupby("dateOfBirth"):
         print(f"\nChecking group with dateOfBirth: {date}")
         
         # Compare names within the group
         for (idx1, row1), (idx2, row2) in itertools.combinations(group.iterrows(), 2):
+
             if is_similar(row1["lastName"], row2["lastName"]):
-                print(f"Row1> {row1.index.values[0]}")
-                print(f"  Similar last names: {row1['lastName']} ~ {row2['lastName']} {row1['id']}::{(row2['id'])}")
-                ids.append((row1['normalized_name'], row2['normalized_name']))
+                df_new=merge_dataframes(pd.DataFrame([row1], columns=df.columns), pd.DataFrame([row2], columns=df.columns), ['dateOfBirth'])    
+                df_from_dict=(df_new["merged_df"])
+
+                merged_df_new=pd.concat([merged_df_new, df_from_dict])
                 break
             if is_similar(row1["firstName"], row2["firstName"]):
-                print(f"  Similar first names: {row1['firstName']} ~ {row2['firstName']} {row1['id']}::{row2['id']}")
-                ids.append((row1['id'], row2['id']))
+                df_new=merge_dataframes(pd.DataFrame([row1], columns=df.columns), pd.DataFrame([row2], columns=df.columns), ['dateOfBirth'])    
+                df_from_dict=(df_new["merged_df"])
+                merged_df_new=pd.concat([merged_df_new, df_from_dict])
                 break
             if is_similar(row1["normalized_name"], row2["normalized_name"]):
-                print(f"  Similar normalized names: {row1['normalized_name']} ~ {row2['normalized_name']} {row1['id']}::{row2['id']}")
-                ids.append((row1['id'], row2['id']))
+                df_new=merge_dataframes(pd.DataFrame([row1], columns=df.columns), pd.DataFrame([row2], columns=df.columns), ['dateOfBirth'])    
+                df_from_dict=(df_new["merged_df"])
+                merged_df_new=pd.concat([merged_df_new, df_from_dict])
                 break
 
-    return ids
+    return merged_df_new
 
 # Check for near matches (only among unmatched)
 def is_similar(name1, name2):

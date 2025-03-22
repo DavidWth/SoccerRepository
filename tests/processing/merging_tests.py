@@ -82,13 +82,13 @@ class MergingTests(unittest.TestCase):
 
     def test_merge_on_additional_attributes(self):
         print(f"merged> {pd.DataFrame(self.players)}")
-        merged_df = data_merging.find_similar_entries(self.players_for_similar_entries)
+        merged_df = data_merging.merge_similar_entries(self.players_for_similar_entries)
 
         print(f"merged> {merged_df}")
 
     def test_merge_on_additional_attributes_with_groups_gt_2(self):
         print(f"merged> {pd.DataFrame(self.players)}")
-        merged_df = data_merging.find_similar_entries(self.players_for_similar_entries)
+        merged_df = data_merging.merge_similar_entries(self.players_for_similar_entries)
 
         print(f"merged> {merged_df}")
 
