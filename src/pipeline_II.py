@@ -23,6 +23,67 @@ from src.processing.data_merging import merge_dataframes, merge_similar_entries
 import json
 from rapidfuzz import process, fuzz
 
+def transform_tuples(input_list):
+    # Define the desired order of sources
+    source_order = ['kicker', 'tf', 'fifa']
+    
+    # Convert list of tuples into a dictionary
+    #source_dict = dict(input_list)
+    source_dict = dict(map(lambda x: (x[1], x[0]), input_list))
+    print(source_dict)    
+    # Create a list of values following the defined order, using "" if missing
+    transformed_list = [source_dict.get(source, "") for source in source_order]
+    
+    return transformed_list
+
+def deep_check(n1, n2):
+    names=[n1,n2]
+
+    names_list=[name.split("_") for name in names]
+    
+    # Convert each sublist to a set
+    sets = [set(sublist) for sublist in names_list]
+    print(sets)
+    
+    # Find the intersection (common elements in all sets)
+    common_names = set.intersection(*sets)
+    #print(common_names)
+    # Check if there is at least one common name
+    result = bool(common_names)
+    
+    #print(result)  # Output: True
+    return result
+
+# search terms is list of column names
+# terms df holds the grouped players based on dob
+def extract(search_terms:list, terms:pd.DataFrame, columns:list):
+    #print(f"{search_terms} :: {terms.to_dict()}")
+    #print()
+    search_terms=search_terms.loc[columns].tolist()
+    terms=terms[columns]
+    
+    matched = []
+    for i, row in terms.iterrows():
+        #print(row.index)
+        #print(f'Row> {i}, {row} :: {type(row)} >>')
+        for search_i, term in enumerate(search_terms):
+            if row.iloc[search_i] == "" or search_terms[search_i] == "":
+                matched.append((row.iloc[search_i], False, i, row["source"]))
+                break
+            #print(f'Search> {row.iloc[search_i]} :: {search_terms[search_i]}')
+            if (row.iloc[search_i] == search_terms[search_i] 
+               or row.iloc[search_i] in search_terms[search_i] 
+               or search_terms[search_i] in row.iloc[search_i]
+                or deep_check(search_terms[search_i], row.iloc[search_i])
+               ):
+                matched.append((row.iloc[search_i], True, i, row["source"]))
+                break
+            else:
+                matched.append((row.iloc[search_i], False, i, row["source"]))
+                break
+
+    return matched
+
 # prepare extract of the three sources
 KICKER_FILE='D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_k.json'
 TF_FILE='D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_tf.json'
@@ -78,3 +139,38 @@ with open(f"{path}\\output_tf_fifa_cleansed.json", 'w', encoding='utf-8') as f:
 
 # Merge using exact match on dateOfBirth
 merged_df_fuzzy = pd.concat([kicker, tf, fifa], ignore_index=True)
+merged_df_fuzzy.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_merged_df_fuzzy.csv", index=False)
+
+grouped_players = []
+checked = set()
+
+for i, row in merged_df_fuzzy.iterrows():
+    if row["id"] in checked:
+        continue
+
+    potential_matches = merged_df_fuzzy[merged_df_fuzzy["dateOfBirth"] == row["dateOfBirth"]]
+    print(f'>>{row[["id", "normalized_name", "source"]]} :: {potential_matches[["id", "normalized_name", "source"]]}<<')
+    #print(potential_matches[["lastName", "source"]])
+    matched = extract(
+        row, 
+        potential_matches,
+        ["normalized_name", "lastName", "firstName", "source"]
+    )
+    
+    print(f'{row.loc[["normalized_name", "lastName"]].tolist()} :: {matched}')
+    print()
+
+    match_ids = []
+    for match_name, score, idx, source in matched: 
+        if score:
+            match_ids.append((merged_df_fuzzy.loc[idx]["id"], merged_df_fuzzy.loc[idx]["source"]))
+            checked.add(merged_df_fuzzy.loc[idx]["id"])
+
+    grouped_players.append({
+        "dateOfBirth": row["dateOfBirth"],
+        "matched_ids": transform_tuples(match_ids)
+     })
+    
+all=pd.DataFrame(grouped_players)
+print(pd.DataFrame(grouped_players))
+all.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\all.csv", encoding='utf-8', index=False)
