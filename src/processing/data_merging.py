@@ -103,3 +103,45 @@ def is_similar(name1, name2):
     if abs(len(name1) - len(name2)) > 10:  # Allow minor length variations
         return False
     return name1 in name2 or name2 in name1  # Simple containment check
+
+# Returns boolean if two strings contain similarities between them using set intersection. Strings are splitted using sep.
+def has_intersection(n1, n2, sep="_"):
+    names=[n1,n2]
+    names_list=[name.split(sep) for name in names]
+    
+    # Convert each sublist to a set
+    sets = [set(sublist) for sublist in names_list]
+    print(sets)
+    
+    # Find the intersection (common elements in all sets)
+    common_names = set.intersection(*sets)
+
+    # Check if there is at least one common name
+    result = bool(common_names)
+    
+    return result
+
+# search terms is list of column names
+# terms df holds the grouped players based on dob
+def extract(search_terms:list, terms:pd.DataFrame, columns:list):
+    search_terms=search_terms.loc[columns].tolist()
+    terms=terms[columns]
+    
+    matched = []
+    for i, row in terms.iterrows():
+        for search_i, term in enumerate(search_terms):
+            if row.iloc[search_i] == "" or search_terms[search_i] == "":
+                matched.append((row.iloc[search_i], False, i, row["source"]))
+                break
+            if (row.iloc[search_i] == search_terms[search_i] 
+               or row.iloc[search_i] in search_terms[search_i] 
+               or search_terms[search_i] in row.iloc[search_i]
+                or has_intersection(search_terms[search_i], row.iloc[search_i])
+               ):
+                matched.append((row.iloc[search_i], True, i, row["source"]))
+                break
+            else:
+                matched.append((row.iloc[search_i], False, i, row["source"]))
+                break
+
+    return matched

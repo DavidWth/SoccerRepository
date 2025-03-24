@@ -15,3 +15,15 @@ def remove_players_from_wrong_competition(data:pd.DataFrame, key:str):
     clubs_filtered=club_counts[club_counts<5].index.tolist()
     data_filtered = data[~data[key].isin(clubs_filtered)]
     return data_filtered
+
+def transform_tuples(input_list):
+    # Define the desired order of sources
+    source_order = ['kicker', 'tf', 'fifa']
+    
+    # Convert list of tuples into a dictionary
+    source_dict = dict(map(lambda x: (x[1], x[0]), input_list))
+    print(source_dict)    
+    # Create a list of values following the defined order, using "" if missing
+    transformed_list = [source_dict.get(source, "") for source in source_order]
+    
+    return transformed_list
