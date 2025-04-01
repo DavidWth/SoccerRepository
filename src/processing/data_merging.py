@@ -110,9 +110,7 @@ def has_intersection(n1, n2, sep="_"):
     names_list=[name.split(sep) for name in names]
     
     # Convert each sublist to a set
-    sets = [set(sublist) for sublist in names_list]
-    print(sets)
-    
+    sets = [set(sublist) for sublist in names_list]   
     # Find the intersection (common elements in all sets)
     common_names = set.intersection(*sets)
 
@@ -123,20 +121,20 @@ def has_intersection(n1, n2, sep="_"):
 
 # search terms is list of column names
 # terms df holds the grouped players based on dob
-def extract(search_terms:list, terms:pd.DataFrame, columns:list):
-    search_terms=search_terms.loc[columns].tolist()
-    terms=terms[columns]
+def extract(active_item:pd.Series, potential_matches:pd.DataFrame, columns:list):
+    active_item=active_item.loc[columns]
+    potential_matches=potential_matches[columns]
     
     matched = []
-    for i, row in terms.iterrows():
-        for search_i, term in enumerate(search_terms):
-            if row.iloc[search_i] == "" or search_terms[search_i] == "":
+    for i, row in potential_matches.iterrows():
+        for search_i, term in enumerate(active_item):
+            if row.iloc[search_i] == "" or term == "":
                 matched.append((row.iloc[search_i], False, i, row["source"]))
                 break
-            if (row.iloc[search_i] == search_terms[search_i] 
-               or row.iloc[search_i] in search_terms[search_i] 
-               or search_terms[search_i] in row.iloc[search_i]
-                or has_intersection(search_terms[search_i], row.iloc[search_i])
+            if (row.iloc[search_i] == term 
+               or row.iloc[search_i] in term 
+               or term in row.iloc[search_i]
+                or has_intersection(term, row.iloc[search_i])
                ):
                 matched.append((row.iloc[search_i], True, i, row["source"]))
                 break

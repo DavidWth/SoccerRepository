@@ -20,8 +20,8 @@ from src.data_sources.file_loader import load_json_file_into_dataframe
 from src.processing.normalization import normalize_name
 from src.processing.transformation import remove_players_from_wrong_competition, transform_tuples
 from src.processing.data_merging import merge_dataframes, merge_similar_entries, has_intersection, extract
-import json
-from rapidfuzz import process, fuzz
+# import json
+# from rapidfuzz import process, fuzz
 
 
 # prepare extract of the three sources
@@ -63,24 +63,29 @@ fifa["source"] = "fifa"
 
 tf["id"] = tf["id"].apply(lambda x: str(x) if pd.notna(x) else "")
 
-path="D:\\DevOps\\python_work\\venv\\demoenv\\resources"
-print(f"Writing to {path}\\output_tf_kicker_cleansed.json")
-with open(f"{path}\\output_tf_kicker_cleansed.json", 'w', encoding='utf-8') as f:
-            json.dump(kicker.to_json(orient="records", force_ascii=False), f, indent=4, ensure_ascii=False)
+# path="D:\\DevOps\\python_work\\venv\\demoenv\\resources"
+# print(f"Writing to {path}\\output_kicker_cleansed.json")
+# kicker = kicker.astype({col: str for col in kicker.select_dtypes(include=["datetime64"])})
+# with open(f"{path}\\output_kicker_cleansed.json", 'w', encoding='utf-8') as f:
+#             json.dump(kicker.to_dict(orient="records"), f, indent=2, ensure_ascii=False)
+# tf = tf.astype({col: str for col in tf.select_dtypes(include=["datetime64"])})
+# with open(f"{path}\\output_tf_cleansed.json", 'w', encoding='utf-8') as f:
+#             json.dump(tf.to_dict(orient="records"), f, indent=2, ensure_ascii=False)
+# fifa = fifa.astype({col: str for col in fifa.select_dtypes(include=["datetime64"])})
+# with open(f"{path}\\output_fifa_cleansed.json", 'w', encoding='utf-8') as f:
+#             json.dump(fifa.to_dict(orient="records"), f, indent=2, ensure_ascii=False)
 
-kicker.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_kicker_cleansed.csv", index=False)
-tf.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_tf_cleansed.csv", index=False)
-fifa.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_fifa_cleansed.csv", index=False)
-
-with open(f"{path}\\output_tf_tf_cleansed.json", 'w', encoding='utf-8') as f:
-            json.dump(tf.to_json(), f, indent=4, ensure_ascii=False)
-with open(f"{path}\\output_tf_fifa_cleansed.json", 'w', encoding='utf-8') as f:
-            json.dump(fifa.to_json(), f, indent=4, ensure_ascii=False)
+# kicker.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_kicker_cleansed.csv", index=False)
+# tf.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_tf_cleansed.csv", index=False)
+# fifa.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_fifa_cleansed.csv", index=False)
 
 # Merge using exact match on dateOfBirth
 merged_df_fuzzy = pd.concat([kicker, tf, fifa], ignore_index=True)
-merged_df_fuzzy.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_merged_df_fuzzy.csv", index=False)
+# merged_df_fuzzy.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\output_merged_df_fuzzy.csv", index=False)
+# with open(f"{path}\\output_merged_fuzzy_cleansed.json", 'w', encoding='utf-8') as f:
+#             json.dump(merged_df_fuzzy.to_dict(orient="records"), f, indent=2, ensure_ascii=False)
 
+# Merge similar entries based on dateOfBirth and normalized_name
 grouped_players = []
 checked = set()
 
@@ -88,17 +93,13 @@ for i, row in merged_df_fuzzy.iterrows():
     if row["id"] in checked:
         continue
 
+    # precondition for matching is same date of birth, for each row get all rows with same date of birth
     potential_matches = merged_df_fuzzy[merged_df_fuzzy["dateOfBirth"] == row["dateOfBirth"]]
-    print(f'>>{row[["id", "normalized_name", "source"]]} :: {potential_matches[["id", "normalized_name", "source"]]}<<')
-    #print(potential_matches[["lastName", "source"]])
     matched = extract(
         row, 
         potential_matches,
         ["normalized_name", "lastName", "firstName", "source"]
     )
-    
-    print(f'{row.loc[["normalized_name", "lastName"]].tolist()} :: {matched}')
-    print()
 
     match_ids = []
     for match_name, score, idx, source in matched: 
@@ -113,4 +114,4 @@ for i, row in merged_df_fuzzy.iterrows():
     
 all=pd.DataFrame(grouped_players)
 print(pd.DataFrame(grouped_players))
-all.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\all.csv", encoding='utf-8', index=False)
+# all.to_csv("D:\\DevOps\\python_work\\venv\\demoenv\\resources\\all.csv", encoding='utf-8', index=False)

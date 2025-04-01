@@ -16,7 +16,10 @@
     apply processing to apply further merging rules
     normalize resulting data frame by carrying out steps from 1 again on new df
 
-
+new approach
+3. build up list with tuples having (kicker, tf, fifa) players
+4. load missing players from fifa using search api
+5. navigate through overall list tuples and map data accordingly to predefined mappings
 """
 import pandas as pd
 import os, sys

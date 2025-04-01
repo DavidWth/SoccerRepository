@@ -22,7 +22,6 @@ def transform_tuples(input_list):
     
     # Convert list of tuples into a dictionary
     source_dict = dict(map(lambda x: (x[1], x[0]), input_list))
-    print(source_dict)    
     # Create a list of values following the defined order, using "" if missing
     transformed_list = [source_dict.get(source, "") for source in source_order]
     

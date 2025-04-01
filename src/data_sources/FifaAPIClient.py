@@ -3,6 +3,7 @@ import json
 import time
 from random import randint
 from datetime import datetime
+from urllib.parse import quote_plus
 
 # Configuration (extendable and modifiable)
 API_CONFIG = {
@@ -54,14 +55,13 @@ def fetch_players_using_params():
         # ]
 
         for player in players:
-            filtered_player = _map_response_to_needed_attributes(player)
+            filtered_player = _map_needed_attributes(player)
             print(f'{filtered_player}')
 
             all_players.append(filtered_player)
 
         offset += limit  # Move to the next batch
         
-
     return all_players
 
 # provide a list with name, birthdate tuples and call API
@@ -78,11 +78,22 @@ def load_players_using_search(players_search:list):
 # return empty dict, or exactly one dict
 def load_player_using_search(name:str, dateOfBirth:str):
     headers = {"User-Agent": "Mozilla/5.0"}     
-    name = name.replace(" ", "+")
-    url = f"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=100&search={name}"
+    encoded_name = quote_plus(name)
+    url = f"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=100&search={encoded_name}"
 
-    print(f"Searching for {url}...")
-    response = requests.get(f"{url}", headers=headers)
+    found = {}
+    status = { 
+            "found": 0, 
+            "not_found": 0
+    }
+    
+    try:
+        print(f"Calling: {url}")
+
+        response = requests.get(f"{url}", headers=headers)
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return {}
 
     if response.status_code != 200:
         print(f"Error: {response.status_code} - {response.text}")
@@ -90,23 +101,31 @@ def load_player_using_search(name:str, dateOfBirth:str):
             
     data = response.json()
     players = data.get("items", [])  # Ensure 'items' exists
-
     if not players:
         print(f"Error: no players found.")
         return {}
+    print(f"Found {len(players)} players for name: {name}")
 
-    total_items = data.get("totalItems", -1)
-    print(f"Found {total_items} player(s) with {name}.")
+    for player in players:
+        if "birthdate" not in player:
+            print(f"Error: 'birthdate' key is missing for player {player.get('id', 'unknown')}.")
+            continue
 
-    # TODO iterate if > 1
-    dob = players[0]["birthdate"].split(" ")
-    date1 = datetime.strptime(dob[0], "%m/%d/%Y").date()
-    date2 = datetime.strptime(dateOfBirth, "%Y-%m-%d").date()
+        print(f"Player: {player['firstName']} {player['lastName']} - Birthdate: {player['birthdate']}")
+        dob = player["birthdate"].split(" ")
+        date1 = datetime.strptime(dob[0], "%m/%d/%Y").date()
+        date2 = datetime.strptime(dateOfBirth, "%Y-%m-%d").date()
 
-    if (date1 == date2):
-        return _map_response_to_needed_attributes(players[0])
-    else:
-        return {}
+        # Check if the player's birthdate matches the provided date for precise identification
+        if (date1 == date2):
+            found = _map_needed_attributes(player)
+            status["found"] += 1
+        else:
+            status["not_found"] += 1
+
+    print(f"Status: {status['found']} found, {status['not_found']} not found")
+
+    return found
 
 def load():
     # Fetch and save data
@@ -118,7 +137,7 @@ def load():
 
     print(f"Saved {len(players_data)} players to players.json")
 
-def _map_response_to_needed_attributes(player:dict):
+def _map_needed_attributes(player:dict):
     filtered_player = {
                 "id": player["id"],
                 "rank": player["rank"],
