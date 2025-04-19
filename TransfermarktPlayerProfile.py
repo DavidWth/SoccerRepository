@@ -145,8 +145,8 @@ class PlayerMarketValue(BasePageElement):
         c = {}
         if current and max:
             print(f"{current.get_attribute('innerText')} :: {max.get_attribute('innerText')}")
-            c["current"] = self.convert_money(current.get_attribute('innerText'))
-            c["highest"] = self.convert_money(max.get_attribute('innerText'))
+            c["current"] = self._convert_money(current.get_attribute('innerText'))
+            c["highest"] = self._convert_money(max.get_attribute('innerText'))
         else:
             c["current"] = 0.0
             c["highest"] = 0.0
@@ -157,7 +157,7 @@ class PlayerMarketValue(BasePageElement):
     def get_data(self):
         return self.data
 
-    def convert_money(self, money_str):
+    def _convert_money(self, money_str):
         money_str = money_str.replace("€", "").lower().strip()  # Remove € symbol and normalize
         if "m" in money_str:
             return float(money_str.replace("m", "")) * 1_000_000  # Convert millions
